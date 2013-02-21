@@ -1,3 +1,8 @@
+;; TODO:
+;; 1. divid emacs.d to static and dynamic directories, such as dirary, tempoary files.
+;; 2. add static emacs.d files to github repos.
+;; 3. support OS specific configurations, including MAC OS X and Linux
+
 ;;;;  0. init
 (setenv "PATH" "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/texbin:/usr/X11/bin:/opt/local/bin:/opt/local/sbin:/opt/texlive/2011/bin/x86_64-linux/")
 ;;(setenv "INFOPATH" "/usr/local/share/info:/usr/share/info:/opt/local/share/info")
@@ -780,6 +785,8 @@
 
 ;;;; 10. general programming  setting
 (require 'protobuf-mode)
+(add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
+
 (require 'smart-compile+ nil t)
 ;;   %F  absolute pathname            ( /usr/local/bin/netscape.bin )
 ;;   %f  file name without directory  ( netscape.bin )
@@ -921,7 +928,8 @@
 ;; this variable is undefined, if gdb process is not running
 (set-default 'gdb-active-process nil)
 (autoload 'matlab-mode "matlab" "Enter MATLAB mode." t)
-(setq auto-mode-alist (cons '("\\.m\\'" . matlab-mode) auto-mode-alist))
+;;(setq auto-mode-alist (cons '("\\.m\\'" . matlab-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist '("\\.m\\'" . matlab-mode))
 (autoload 'matlab-shell "matlab" "Interactive MATLAB mode." t)
 ;;(setq matlab-indent-function-body t)  ; if you want function bodies indented
 (setq matlab-verify-on-save-flag nil) ; turn off auto-verify on save
@@ -940,7 +948,7 @@
 ;;    Command line parameters run with `matlab-shell-command'.
 
 ;;;; 15. R/ESS
-(add-to-list 'auto-mode-alist '("\\.R$'" . R-mode))
+;;(add-to-list 'auto-mode-alist '("\\.R$'" . R-mode))
 (autoload 'R-mode "ess-site" "Enter R mode." t)
 (require 'ess-site)
 (setq ess-eval-visibly-p nil) ;otherwise C-c C-r (eval region) takes forever
