@@ -1,0 +1,15 @@
+startup_message off
+vbell off
+ 
+#caption always "%{=u kC} %= %-w%L>%{=b G}[:%n %t:]%{-}%52<%+w %L="
+escape ^L^L
+ 
+deflogin off
+# default shell is zsh
+#defshell /usr/bin/zsh
+# default starting dir is ~
+shell bash
+defscrollback 1000
+hardstatus alwayslastline
+hardstatus string '%{gk}[ %{G}%H %{g}][%= %{wk}%?%-Lw%?%{=b kR}(%{W}%n*%f %t%?(%u)%?%{=b kR})%{= kw}%?%+Lw%?%?%= %{g}]%{=b C}[ %m/%d %c:%s ]%{W}'
+chdir

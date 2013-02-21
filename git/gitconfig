@@ -1,0 +1,10 @@
+[color]
+	ui = auto
+[core]
+	editor = /usr/bin/vim
+	excludesfile = /home/baotong/.git_ignore
+[user]
+	name = Baotong Zhuang
+	email = baotong.zhuang@gmail.com
+[diff]
+	tool = vimdiff
