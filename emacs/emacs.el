@@ -557,8 +557,10 @@
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (global-set-key (kbd "C-c a") 'org-agenda)
 (setq org-agenda-files '("~/.todo"))
-
+(require 'org-element)
+(require 'org-e-odt)
 (require 'remember)
+
 (add-hook 'remember-mode-hook 'org-remember-apply-template)
 (setq remember-handler-functions '(org-remember-handler))
 
@@ -1053,6 +1055,9 @@ occurence of CHAR."
 ;; evernote setting
 (setq evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; option
                                         ;(add-to-list 'load-path "<your load path>")
+(require 'markdown-mode)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 ;; (require 'evernote-mode)
 ;; (global-set-key "\C-cec" 'evernote-create-note)
