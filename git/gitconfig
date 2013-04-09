@@ -8,3 +8,8 @@
 	email = baotong.zhuang@gmail.com
 [diff]
 	tool = vimdiff
+[alias]
+        co = checkout
+        br = branch
+        ci = commit
+        st = status
