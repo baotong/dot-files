@@ -151,7 +151,7 @@
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 ;;Set text-mode to automatically use long-lines mode.
 (add-hook 'text-mode-hook 'longlines-mode)
-(setq default-fill-column 200)
+(setq default-fill-column 130)
 (setq x-select-enable-clipboard t) ; support to exchange data with outter.
 (setq frame-title-format "Robert@%b")
 ;; fill commands to insert two spaces after a colon
@@ -183,6 +183,7 @@
       "~/.emacs.d/abbrev_defs")   
 ;;(add-hook 'text-mode-hook (lambda () (abbrev-mode 1)))
 (setq save-abbrevs t)
+(setq-default abbrev-mode t)
 
 (global-set-key "\M-p" 'cperl-perldoc) ; alt-p
 
@@ -428,6 +429,7 @@
                                                              ("TAGS" (name . "^TAGS\\(<[0-9]+>\\)?$"))
                                                              ("dired" (mode . dired-mode))
                                                              ("Shell" (name . ".*\\.sh$"))
+                                                             ("SQL" (name . ".*\\.sql$"))
                                                              ("ORG" (mode . org-mode))
                                                              ;; ("Shell" (mode . shell-script-mode))
                                                              ("java" (mode . java-mode))
@@ -932,7 +934,176 @@
 
 ;;; }}}
 ;;;; 12.
-;;;; 13. sql/hive settings
+;;;; 13. sql/hive/odps settings
+;;;; hive mode
+(require 'sql)
+
+(eval-after-load "sql"
+  (load-library "sql-indent"))
+
+;; TODO: 增加格式化时, 自动关键字大写
+(add-hook 'sql-mode-hook (lambda ()
+                           (abbrev-mode t)
+                           ))
+(define-abbrev-table 'sql-mode-abbrev-table
+  (mapcar #'(lambda (v) (list v (upcase v) nil 1))
+          '("absolute" "action" "add" "after" "all" "allocate" "alter" "and" "any" "are" "array" "as" "asc" "asensitive"
+            "assertion" "asymmetric" "at" "atomic" "authorization" "avg" "before" "begin" "between" "bigint" "binary" "bit"
+            "bitlength" "blob" "boolean" "both" "breadth" "by" "call" "called" "cascade" "cascaded" "case" "cast" "catalog"
+            "char" "char_length" "character" "character_length" "check" "clob" "close" "coalesce" "collate" "collation"
+            "column" "commit" "condition" "connect" "connection" "constraint" "constraints" "constructor" "contains"
+            "continue" "convert" "corresponding" "count" "create" "cross" "cube" "current" "current_date"
+            "current_default_transform_group" "current_path" "current_role" "current_time" "current_timestamp"
+            "current_transform_group_for_type" "current_user" "cursor" "cycle" "data" "date" "day" "deallocate" "dec"
+            "decimal" "declare" "default" "deferrable" "deferred" "delete" "depth" "deref" "desc" "describe" "descriptor"
+            "deterministic" "diagnostics" "disconnect" "distinct" "do" "domain" "double" "drop" "dynamic" "each" "element"
+            "else" "elseif" "end" "equals" "escape" "except" "exception" "exec" "execute" "exists" "exit" "external" "extract"
+            "false" "fetch" "filter" "first" "float" "for" "foreign" "found" "free" "from" "full" "function" "general" "get"
+            "global" "go" "goto" "grant" "group" "grouping" "handler" "having" "hold" "hour" "identity" "if" "immediate" "in"
+            "indicator" "initially" "inner" "inout" "input" "insensitive" "insert" "int" "integer" "intersect" "interval"
+            "into" "is" "isolation" "iterate" "join" "key" "language" "large" "last" "lateral" "leading" "leave" "left" "level"
+            "like" "local" "localtime" "localtimestamp" "locator" "loop" "lower" "map" "match" "map" "member" "merge" "method"
+            "min" "minute" "modifies" "module" "month" "multiset" "names" "national" "natural" "nchar" "nclob" "new" "next"
+            "no" "none" "not" "null" "nullif" "numeric" "object" "octet_length" "of" "old" "on" "only" "open" "option" "or" "overwrite"
+            "order" "ordinality" "out" "outer" "output" "over" "overlaps" "pad" "parameter" "partial" "partition" "path"
+            "position" "precision" "prepare" "preserve" "primary" "prior" "privileges" "procedure" "public" "range" "read"
+            "reads" "real" "recursive" "ref" "references" "referencing" "relative" "release" "repeat" "resignal" "restrict"
+            "result" "return" "returns" "revoke" "right" "role" "rollback" "rollup" "routine" "row" "rows" "savepoint" "schema"
+            "scope" "scroll" "search" "second" "section" "select" "sensitive" "session" "session_user" "set" "sets" "signal" "string"
+            "similar" "size" "smallint" "some" "space" "specific" "specifictype" "sql" "sqlcode" "sqlerror" "sqlexception"
+            "sqlstate" "sqlwarning" "start" "state" "static" "submultiset" "substring" "sum" "symmetric" "system" "system_user"
+            "table" "tablesample" "temporary" "then" "time" "timestamp" "timezone_hour" "timezone_minute" "to" "trailing"
+            "transaction" "translate" "translation" "treat" "trigger" "trim" "true" "under" "undo" "union" "unique" "unknown"
+            "unnest" "until" "update" "upper" "usage" "using" "value" "values" "varchar" "varying" "view" "when" "whenever"
+            "where" "while" "window" "with" "within" "without" "work" "write" "year" "zone" "partitioned" "comment")
+          ))
+
+(defvar sql-mode-hive-font-lock-keywords
+  (eval-when-compile
+    (list
+     ;; hive Functions
+     (sql-font-lock-keywords-builder 'font-lock-builtin-face nil
+"ascii" "avg" "bdmpolyfromtext" "bdmpolyfromwkb" "bdpolyfromtext"
+"bdpolyfromwkb" "benchmark" "bin" "bit_and" "bit_length" "bit_or"
+"bit_xor" "both" "cast" "char_length" "character_length" "coalesce"
+"concat" "concat_ws" "connection_id" "conv" "convert" "count"
+"curdate" "current_date" "current_time" "current_timestamp" "curtime"
+"elt" "encrypt" "export_set" "field" "find_in_set" "found_rows"
+"geomcollfromtext" "geomcollfromwkb" "geometrycollectionfromtext"
+"geometrycollectionfromwkb" "geometryfromtext" "geometryfromwkb"
+"geomfromtext" "geomfromwkb" "get_lock" "group_concat" "hex" "ifnull"
+"instr" "interval" "isnull" "last_insert_id" "lcase" "leading"
+"length" "linefromtext" "linefromwkb" "linestringfromtext"
+"linestringfromwkb" "load_file" "locate" "lower" "lpad" "ltrim"
+"make_set" "master_pos_wait" "max" "mid" "min" "mlinefromtext"
+"mlinefromwkb" "mpointfromtext" "mpointfromwkb" "mpolyfromtext"
+"mpolyfromwkb" "multilinestringfromtext" "multilinestringfromwkb"
+"multipointfromtext" "multipointfromwkb" "multipolygonfromtext"
+"multipolygonfromwkb" "now" "nullif" "oct" "octet_length" "ord"
+"pointfromtext" "pointfromwkb" "polyfromtext" "polyfromwkb"
+"polygonfromtext" "polygonfromwkb" "position" "quote" "rand"
+"release_lock" "repeat" "replace" "reverse" "rpad" "rtrim" "soundex"
+"space" "std" "stddev" "substring" "substring_index" "sum" "sysdate"
+"trailing" "trim" "ucase" "unix_timestamp" "upper" "user" "variance"
+)
+
+     ;; hive Keywords
+     (sql-font-lock-keywords-builder 'font-lock-keyword-face nil
+"stored" "sequencefile" "local" "overwrite" "external" "action"
+"add" "after" "against" "all" "alter" "and" "as" "asc"
+"auto_increment" "avg_row_length" "bdb" "between" "by" "cascade"
+"case" "change" "character" "check" "checksum" "close" "collate"
+"collation" "column" "columns" "comment" "committed" "concurrent"
+"constraint" "create" "cross" "data" "database" "default"
+"delay_key_write" "delayed" "delete" "desc" "directory" "disable"
+"distinct" "distinctrow" "do" "drop" "dumpfile" "duplicate" "else" "elseif"
+"enable" "enclosed" "end" "escaped" "exists" "fields" "first" "for"
+"force" "foreign" "from" "full" "fulltext" "global" "group" "handler"
+"having" "heap" "high_priority" "if" "ignore" "in" "index" "infile"
+"inner" "insert" "insert_method" "into" "is" "isam" "isolation" "join"
+"key" "keys" "last" "left" "level" "like" "limit" "lines" "load"
+"local" "lock" "low_priority" "match" "max_rows" "merge" "min_rows"
+"mode" "modify" "mrg_myisam" "myisam" "natural" "next" "no" "not"
+"null" "offset" "oj" "on" "open" "optionally" "or" "order" "outer"
+"outfile" "pack_keys" "partial" "password" "prev" "primary"
+"procedure" "quick" "raid0" "raid_type" "read" "references" "rename"
+"repeatable" "restrict" "right" "rollback" "rollup" "row_format"
+"savepoint" "select" "separator" "serializable" "session" "set"
+"share" "show" "sql_big_result" "sql_buffer_result" "sql_cache"
+"sql_calc_found_rows" "sql_no_cache" "sql_small_result" "starting"
+"straight_join" "striped" "table" "tables" "temporary" "terminated"
+"then" "to" "transaction" "truncate" "type" "uncommitted" "union"
+"unique" "unlock" "update" "use" "using" "values" "when" "where"
+"with" "write" "xor" "overwrite"
+)
+
+     ;; hive Data Types
+     (sql-font-lock-keywords-builder 'font-lock-type-face nil
+"string" "bigint" "binary" "bit" "blob" "bool" "boolean" "char" "curve" "date"
+"datetime" "dec" "decimal" "double" "enum" "fixed" "float" "geometry"
+"geometrycollection" "int" "integer" "line" "linearring" "linestring"
+"longblob" "longtext" "mediumblob" "mediumint" "mediumtext"
+"multicurve" "multilinestring" "multipoint" "multipolygon"
+"multisurface" "national" "numeric" "point" "polygon" "precision"
+"real" "smallint" "surface" "text" "time" "timestamp" "tinyblob"
+"tinyint" "tinytext" "unsigned" "varchar" "year" "year2" "year4"
+"zerofill"
+)))
+
+  "HIVE SQL keywords used by font-lock.
+
+This variable is used by `sql-mode' and `sql-interactive-mode'.  The
+regular expressions are created during compilation by calling the
+function `regexp-opt'.  Therefore, take a look at the source before
+you define your own `sql-mode-mysql-font-lock-keywords'.")
+
+(defcustom sql-hive-options nil
+  "List of additional options for `sql-hive-program'."
+  :type '(repeat string)
+  :group 'SQL)
+
+(defcustom sql-hive-program "/home/baotong/odps/bin/odpscmd"
+  "Command to start ihive by hive."
+  :type 'file
+  :group 'SQL)
+
+(defcustom sql-hive-login-params nil
+  "List of login parameters needed to connect to MySQL."
+  :type 'sql-login-params
+  :version "24.1"
+  :group 'SQL)
+
+(sql-add-product 'hive "HIVE"
+                 :free-software t
+                 :font-lock sql-mode-hive-font-lock-keywords
+                 :sqli-program sql-hive-program
+                 :sqli-options sql-hive-options
+                 :sqli-login sql-hive-login-params
+                 :statement sql-ansi-statement-starters
+                 :list-all "SHOW TABLES;"
+                 :list-table "DESCRIBE %s;"
+                 :prompt-regexp "^odps> "
+                 :prompt-cont-regexp "^    -> "
+                 :syntax-alist nil
+                 :prompt-length 7
+                 :input-filter 'sql-remove-tabs-filter
+                 )
+
+
+(defun sql-comint-hive (product options)
+  "Connect ti HiveDB in a comint buffer."
+    (let ((params))
+      (sql-comint product params)))
+
+(sql-set-product-feature 'hive
+                         :sqli-comint-func 'sql-comint-hive)
+
+(defun sql-hive (&optional buffer)
+  "Run ihive by HiveDB as an inferior process."
+  (interactive "P")
+  (sql-product-interactive 'hive buffer))
+
+
 ;;;; 14. matlab settings
 ;; this variable is undefined, if gdb process is not running
 (set-default 'gdb-active-process nil)
