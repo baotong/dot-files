@@ -944,7 +944,13 @@
 ;; TODO: 增加格式化时, 自动关键字大写
 (add-hook 'sql-mode-hook (lambda ()
                            (abbrev-mode t)
+                           (sql-set-product 'hive)
                            ))
+
+(add-hook 'yaml-mode-hook
+          '(lambda ()
+             (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
+
 (define-abbrev-table 'sql-mode-abbrev-table
   (mapcar #'(lambda (v) (list v (upcase v) nil 1))
           '("absolute" "action" "add" "after" "all" "allocate" "alter" "and" "any" "are" "array" "as" "asc" "asensitive"
@@ -975,7 +981,7 @@
             "table" "tablesample" "temporary" "then" "time" "timestamp" "timezone_hour" "timezone_minute" "to" "trailing"
             "transaction" "translate" "translation" "treat" "trigger" "trim" "true" "under" "undo" "union" "unique" "unknown"
             "unnest" "until" "update" "upper" "usage" "using" "value" "values" "varchar" "varying" "view" "when" "whenever"
-            "where" "while" "window" "with" "within" "without" "work" "write" "year" "zone" "partitioned" "comment")
+            "where" "while" "window" "with" "within" "without" "work" "write" "year" "partitioned" "comment" "limit")
           ))
 
 (defvar sql-mode-hive-font-lock-keywords
@@ -983,73 +989,70 @@
     (list
      ;; hive Functions
      (sql-font-lock-keywords-builder 'font-lock-builtin-face nil
-"ascii" "avg" "bdmpolyfromtext" "bdmpolyfromwkb" "bdpolyfromtext"
-"bdpolyfromwkb" "benchmark" "bin" "bit_and" "bit_length" "bit_or"
-"bit_xor" "both" "cast" "char_length" "character_length" "coalesce"
-"concat" "concat_ws" "connection_id" "conv" "convert" "count"
-"curdate" "current_date" "current_time" "current_timestamp" "curtime"
-"elt" "encrypt" "export_set" "field" "find_in_set" "found_rows"
-"geomcollfromtext" "geomcollfromwkb" "geometrycollectionfromtext"
-"geometrycollectionfromwkb" "geometryfromtext" "geometryfromwkb"
-"geomfromtext" "geomfromwkb" "get_lock" "group_concat" "hex" "ifnull"
-"instr" "interval" "isnull" "last_insert_id" "lcase" "leading"
-"length" "linefromtext" "linefromwkb" "linestringfromtext"
-"linestringfromwkb" "load_file" "locate" "lower" "lpad" "ltrim"
-"make_set" "master_pos_wait" "max" "mid" "min" "mlinefromtext"
-"mlinefromwkb" "mpointfromtext" "mpointfromwkb" "mpolyfromtext"
-"mpolyfromwkb" "multilinestringfromtext" "multilinestringfromwkb"
-"multipointfromtext" "multipointfromwkb" "multipolygonfromtext"
-"multipolygonfromwkb" "now" "nullif" "oct" "octet_length" "ord"
-"pointfromtext" "pointfromwkb" "polyfromtext" "polyfromwkb"
-"polygonfromtext" "polygonfromwkb" "position" "quote" "rand"
-"release_lock" "repeat" "replace" "reverse" "rpad" "rtrim" "soundex"
-"space" "std" "stddev" "substring" "substring_index" "sum" "sysdate"
-"trailing" "trim" "ucase" "unix_timestamp" "upper" "user" "variance"
-)
-
+                                     "ascii" "avg" "bdmpolyfromtext" "bdmpolyfromwkb" "bdpolyfromtext"
+                                     "bdpolyfromwkb" "benchmark" "bin" "bit_and" "bit_length" "bit_or"
+                                     "bit_xor" "both" "cast" "char_length" "character_length" "coalesce"
+                                     "concat" "concat_ws" "connection_id" "conv" "convert" "count"
+                                     "curdate" "current_date" "current_time" "current_timestamp" "curtime"
+                                     "elt" "encrypt" "export_set" "field" "find_in_set" "found_rows"
+                                     "geomcollfromtext" "geomcollfromwkb" "geometrycollectionfromtext"
+                                     "geometrycollectionfromwkb" "geometryfromtext" "geometryfromwkb"
+                                     "geomfromtext" "geomfromwkb" "get_lock" "group_concat" "hex" "ifnull"
+                                     "instr" "interval" "isnull" "last_insert_id" "lcase" "leading"
+                                     "length" "linefromtext" "linefromwkb" "linestringfromtext"
+                                     "linestringfromwkb" "load_file" "locate" "lower" "lpad" "ltrim"
+                                     "make_set" "master_pos_wait" "max" "mid" "min" "mlinefromtext"
+                                     "mlinefromwkb" "mpointfromtext" "mpointfromwkb" "mpolyfromtext"
+                                     "mpolyfromwkb" "multilinestringfromtext" "multilinestringfromwkb"
+                                     "multipointfromtext" "multipointfromwkb" "multipolygonfromtext"
+                                     "multipolygonfromwkb" "now" "nullif" "oct" "octet_length" "ord"
+                                     "pointfromtext" "pointfromwkb" "polyfromtext" "polyfromwkb"
+                                     "polygonfromtext" "polygonfromwkb" "position" "quote" "rand"
+                                     "release_lock" "repeat" "replace" "reverse" "rpad" "rtrim" "soundex"
+                                     "space" "std" "stddev" "substring" "substring_index" "sum" "sysdate"
+                                     "trailing" "trim" "ucase" "unix_timestamp" "upper" "user" "variance"
+                                     )
      ;; hive Keywords
      (sql-font-lock-keywords-builder 'font-lock-keyword-face nil
-"stored" "sequencefile" "local" "overwrite" "external" "action"
-"add" "after" "against" "all" "alter" "and" "as" "asc"
-"auto_increment" "avg_row_length" "bdb" "between" "by" "cascade"
-"case" "change" "character" "check" "checksum" "close" "collate"
-"collation" "column" "columns" "comment" "committed" "concurrent"
-"constraint" "create" "cross" "data" "database" "default"
-"delay_key_write" "delayed" "delete" "desc" "directory" "disable"
-"distinct" "distinctrow" "do" "drop" "dumpfile" "duplicate" "else" "elseif"
-"enable" "enclosed" "end" "escaped" "exists" "fields" "first" "for"
-"force" "foreign" "from" "full" "fulltext" "global" "group" "handler"
-"having" "heap" "high_priority" "if" "ignore" "in" "index" "infile"
-"inner" "insert" "insert_method" "into" "is" "isam" "isolation" "join"
-"key" "keys" "last" "left" "level" "like" "limit" "lines" "load"
-"local" "lock" "low_priority" "match" "max_rows" "merge" "min_rows"
-"mode" "modify" "mrg_myisam" "myisam" "natural" "next" "no" "not"
-"null" "offset" "oj" "on" "open" "optionally" "or" "order" "outer"
-"outfile" "pack_keys" "partial" "password" "prev" "primary"
-"procedure" "quick" "raid0" "raid_type" "read" "references" "rename"
-"repeatable" "restrict" "right" "rollback" "rollup" "row_format"
-"savepoint" "select" "separator" "serializable" "session" "set"
-"share" "show" "sql_big_result" "sql_buffer_result" "sql_cache"
-"sql_calc_found_rows" "sql_no_cache" "sql_small_result" "starting"
-"straight_join" "striped" "table" "tables" "temporary" "terminated"
-"then" "to" "transaction" "truncate" "type" "uncommitted" "union"
-"unique" "unlock" "update" "use" "using" "values" "when" "where"
-"with" "write" "xor" "overwrite"
-)
-
+                                     "stored" "sequencefile" "local" "overwrite" "external" "action"
+                                     "add" "after" "against" "all" "alter" "and" "as" "asc"
+                                     "auto_increment" "avg_row_length" "bdb" "between" "by" "cascade"
+                                     "case" "change" "character" "check" "checksum" "close" "collate"
+                                     "collation" "column" "columns" "comment" "committed" "concurrent"
+                                     "constraint" "create" "cross" "data" "database" "default"
+                                     "delay_key_write" "delayed" "delete" "desc" "directory" "disable"
+                                     "distinct" "distinctrow" "do" "drop" "dumpfile" "duplicate" "else" "elseif"
+                                     "enable" "enclosed" "end" "escaped" "exists" "fields" "first" "for"
+                                     "force" "foreign" "from" "full" "fulltext" "global" "group" "handler"
+                                     "having" "heap" "high_priority" "if" "ignore" "in" "index" "infile"
+                                     "inner" "insert" "insert_method" "into" "is" "isam" "isolation" "join"
+                                     "key" "keys" "last" "left" "level" "like" "limit" "lines" "load"
+                                     "local" "lock" "low_priority" "match" "max_rows" "merge" "min_rows"
+                                     "mode" "modify" "mrg_myisam" "myisam" "natural" "next" "no" "not"
+                                     "null" "offset" "oj" "on" "open" "optionally" "or" "order" "outer"
+                                     "outfile" "pack_keys" "partial" "password" "prev" "primary"
+                                     "procedure" "quick" "raid0" "raid_type" "read" "references" "rename"
+                                     "repeatable" "restrict" "right" "rollback" "rollup" "row_format"
+                                     "savepoint" "select" "separator" "serializable" "session" "set"
+                                     "share" "show" "sql_big_result" "sql_buffer_result" "sql_cache"
+                                     "sql_calc_found_rows" "sql_no_cache" "sql_small_result" "starting"
+                                     "straight_join" "striped" "table" "tables" "temporary" "terminated"
+                                     "then" "to" "transaction" "truncate" "type" "uncommitted" "union"
+                                     "unique" "unlock" "update" "use" "using" "values" "when" "where"
+                                     "with" "write" "xor" "overwrite"
+                                     )
      ;; hive Data Types
      (sql-font-lock-keywords-builder 'font-lock-type-face nil
-"string" "bigint" "binary" "bit" "blob" "bool" "boolean" "char" "curve" "date"
-"datetime" "dec" "decimal" "double" "enum" "fixed" "float" "geometry"
-"geometrycollection" "int" "integer" "line" "linearring" "linestring"
-"longblob" "longtext" "mediumblob" "mediumint" "mediumtext"
-"multicurve" "multilinestring" "multipoint" "multipolygon"
-"multisurface" "national" "numeric" "point" "polygon" "precision"
-"real" "smallint" "surface" "text" "time" "timestamp" "tinyblob"
-"tinyint" "tinytext" "unsigned" "varchar" "year" "year2" "year4"
-"zerofill"
-)))
-
+                                     "string" "bigint" "binary" "bit" "blob" "bool" "boolean" "char" "curve" "date"
+                                     "datetime" "dec" "decimal" "double" "enum" "fixed" "float" "geometry"
+                                     "geometrycollection" "int" "integer" "line" "linearring" "linestring"
+                                     "longblob" "longtext" "mediumblob" "mediumint" "mediumtext"
+                                     "multicurve" "multilinestring" "multipoint" "multipolygon"
+                                     "multisurface" "national" "numeric" "point" "polygon" "precision"
+                                     "real" "smallint" "surface" "text" "time" "timestamp" "tinyblob"
+                                     "tinyint" "tinytext" "unsigned" "varchar" "year" "year2" "year4"
+                                     "zerofill"
+                                     )))
   "HIVE SQL keywords used by font-lock.
 
 This variable is used by `sql-mode' and `sql-interactive-mode'.  The
@@ -1062,7 +1065,7 @@ you define your own `sql-mode-mysql-font-lock-keywords'.")
   :type '(repeat string)
   :group 'SQL)
 
-(defcustom sql-hive-program "/home/baotong/odps/bin/odpscmd"
+(defcustom sql-hive-program "/opt/odps/bin/odpscmd"
   "Command to start ihive by hive."
   :type 'file
   :group 'SQL)
