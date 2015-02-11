@@ -12,8 +12,21 @@
 (setq mac-option-modifier 'supper)
 (setq mac-control-modifier 'control)
 
-(set-frame-font "Consolas-12")
-;(set-frame-font "Monaco-12")
+;;(set-frame-font "Consolas-14")
+;;(set-frame-font "Monaco-14")
+(when (display-graphic-p)
+  (setq fonts
+        (cond ((eq system-type 'darwin)     '("Monaco"     "STHeiti"))
+              ((eq system-type 'gnu/linux)  '("Menlo"     "WenQuanYi Zen Hei"))
+              ((eq system-type 'windows-nt) '("Consolas"  "Microsoft Yahei"))))
+
+  (setq face-font-rescale-alist '(("STHeiti" . 1.2) ("Microsoft Yahei" . 1.2)
+                                  ("WenQuanYi Zen Hei" . 1.2)))
+  (set-face-attribute 'default nil :font
+                      (format "%s:pixelsize=%d" (car fonts) 14))
+  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+    (set-fontset-font (frame-parameter nil 'font) charset
+                      (font-spec :family (car (cdr fonts))))))
 
 ;;(require 'ibus)
 ;; Turn on ibus-mode automatically after loading .emacs
@@ -31,7 +44,7 @@
 
 ;;(global-set-key (kbd "s-SPC") 'ibus-toggle)
 
-;; (set-fontset-font (frame-parameter nil 'font)  
+;; (set-fontset-font (frame-parameter nil 'font)
 ;;                   'unicode '("STHeiti" . "unicode-bmp"))
 
 (defvar has-spell-utility (cond ((eq system-type 'gnu/linux) t)
@@ -46,7 +59,7 @@
                                          'fullboth)))
 
 (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-    (let* ((my-lisp-dir (expand-file-name "~/.emacs.d"))
+    (let* ((my-lisp-dir (expand-file-name "~/.emacs.d/lisp"))
            (glob-lisp-dir (expand-file-name "/usr/share/emacs/site-lisp/"))
            (default-directory my-lisp-dir))
       (setq load-path (cons my-lisp-dir load-path))
@@ -84,7 +97,7 @@
 
 (require 'yasnippet) ;; not yasnippet-bundle
 (yas/initialize)
-(yas/load-directory "~/.emacs.d/yasnippet-0.5.10/snippets")
+(yas/load-directory "~/.emacs.d/lisp/yasnippet-0.5.10/snippets")
 
 ;; browse kill ring
 
@@ -150,7 +163,7 @@
 (setq default-major-mode 'text-mode)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 ;;Set text-mode to automatically use long-lines mode.
-(add-hook 'text-mode-hook 'longlines-mode)
+;;(add-hook 'text-mode-hook 'longlines-mode)
 (setq default-fill-column 130)
 (setq x-select-enable-clipboard t) ; support to exchange data with outter.
 (setq frame-title-format "Robert@%b")
@@ -1085,10 +1098,10 @@ you define your own `sql-mode-mysql-font-lock-keywords'.")
                  :statement sql-ansi-statement-starters
                  :list-all "SHOW TABLES;"
                  :list-table "DESCRIBE %s;"
-                 :prompt-regexp "^odps> "
-                 :prompt-cont-regexp "^    -> "
+                 :prompt-regexp "^odps@.+>"
+                 :prompt-cont-regexp "^.+>"
                  :syntax-alist nil
-                 :prompt-length 7
+                 :prompt-length 20
                  :input-filter 'sql-remove-tabs-filter
                  )
 
@@ -1137,6 +1150,14 @@ you define your own `sql-mode-mysql-font-lock-keywords'.")
 (setq ess-eval-visibly-p nil) ;otherwise C-c C-r (eval region) takes forever
 (setq ess-ask-for-ess-directory nil) ;otherwise you are prompted each time you start an interactive R session
 (require 'ess-eldoc) ;to show function arguments while you are typing them
+
+;; keyboard bindings
+;; (add-hook 'R-mode-hook
+;;           (lambda ()
+;;             (local-set-key "\C-O C-e" 'ess-eval-buffer-from-here-to-end)
+;;             (local-set-key "\C-O C-a" 'ess-eval-buffer-from-beg-to-here)
+;;             )
+;;           )
 
 ;;;; 16. golang
 (require 'go-mode-load)
